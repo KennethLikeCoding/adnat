@@ -5,6 +5,7 @@ import { HashRouter, Route, Switch } from 'react-router-dom';
 
 import { LoginComponent } from './login/login';
 import { SignupComponent } from './signup/signup';
+import { DashboardComponent } from './dashboard/dashboard';
 
 function App(props) {
 
@@ -13,6 +14,7 @@ function App(props) {
             <Switch>
                 <Route exact path="/" component={LoginComponent} />
                 <Route exact path="/signup" component={SignupComponent} />
+                <Route exact path="/dashboard" component={DashboardComponent} />
             </Switch>
         </HashRouter>
     );
