@@ -11,7 +11,9 @@ export class NotEmployedComponent extends React.Component {
         this.state = {
             sessionId: props.sessionId,
             orgs: [],
-            displayOrgs: true
+            displayOrgs: true,
+            orgName: null,
+            rate: null
         };
     }
 
@@ -70,8 +72,8 @@ export class NotEmployedComponent extends React.Component {
             )
         } else {
             return this.state.orgs.map(
-                org => {
-                    return <ul>{org.name}</ul>
+                (org, i) => {
+                    return <ul key={i}>{org.name}</ul>
                 }
             )
         }
@@ -85,15 +87,20 @@ export class NotEmployedComponent extends React.Component {
     }
 
     onNameChange = (event) => {
-
+        this.setState({...this.state, orgName: event.target.value})
     }
 
     onSalaryChange = (event) => {
-
+        this.setState({...this.state, rate: event.target.value})
     }
 
     submit = () => {
-       
+        let body = {name: this.state.orgName, hourlyRate: this.state.rate};
+        let headers = this.getHeaders();
+        axios.post(env.BASE_URL + 'organisations/create_join', body, headers).then(
+        resp => {
+            this.props.onOrgChange(resp.data);
+        })
     }
 
     render() {

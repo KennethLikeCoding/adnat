@@ -1,6 +1,7 @@
 import React from 'react'
 import './dashboard.css';
 
+import { EmployedComponent } from './employed/employed';
 import { NotEmployedComponent } from './not-employed/not-employed';
 
 const axios = require('axios')
@@ -14,8 +15,10 @@ export class DashboardComponent extends React.Component {
             sessionId: props.location.state.sessionId,
             username: null,
             userId: null,
+            email: null,
             orgId: null,
-            email: null
+            orgName: null,
+            rate: null
         };
     }
 
@@ -33,16 +36,30 @@ export class DashboardComponent extends React.Component {
                         username: resp.data.name,
                         userId: resp.data.id,
                         email: resp.data.email,
-                        orgId: resp.data.organisationId
                     })
+                    let orgId = resp.data.organisationId
+                    if (orgId) {
+                        axios.get(env.BASE_URL + 'organisations/?org_id='+orgId, headers).then(
+                            resp => {
+                                let org = resp.data[0];
+                                this.setState({...this.state, orgId: org.id, orgName: org.name, rate: org.hourlyRate});
+                            }
+                        )
+                    }
             })
         }
     }
 
-    notInOrg() {
+    renderMainContent() {
         if (!this.state.orgId) {
-            return (<NotEmployedComponent sessionId={this.state.sessionId} />)
+            return (<NotEmployedComponent sessionId={this.state.sessionId} onOrgChange={this.handleOrgChange} />)
         }
+        let org = {id: this.state.orgId, name: this.state.orgName, rate: this.state.rate};
+        return (<EmployedComponent sessionId={this.state.sessionId} org={org}/>)
+    }
+
+    handleOrgChange = (org) => {
+        this.setState({...this.state, orgId: org.id, orgName: org.name, rate: org.hourlyRate});
     }
 
     render() {
@@ -51,7 +68,7 @@ export class DashboardComponent extends React.Component {
                 <div className="ui container pt--2">
                     <h1 className="adnat-title">Adnat</h1>
                     <p>Logged in as {this.state.username}</p>
-                    {this.notInOrg()}
+                    {this.renderMainContent()}
                 </div>
             )
         }
