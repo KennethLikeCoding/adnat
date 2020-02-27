@@ -1,5 +1,7 @@
 import React from 'react';
 
+import { EditOrganisationComponent } from '../edit-organisation/edit-organisation';
+
 const axios = require('axios');
 const env = require('../../../environment').environment;
 
@@ -54,6 +56,17 @@ export class EmployedComponent extends React.Component {
         }
     }
 
+    handleUpdatedOrg = (org) => {
+        this.setState({...this.state, edit: false, orgName: org.name, rate: org.hourlyRate});
+    }
+
+    renderEditForm() {
+        if (this.state.edit) {
+            let org = {name: this.state.orgName, hourlyRate: this.state.rate, id: this.state.orgId};
+            return (<EditOrganisationComponent org={org} sessionId={this.state.sessionId} onSubmit={this.handleUpdatedOrg} />)
+        }
+    }
+
     render() {
         return (
             <div>
@@ -64,6 +77,7 @@ export class EmployedComponent extends React.Component {
                     <button onClick={this.handleLeave} className="ui red basic button"><i className="user times icon"></i>Leave</button>
                 </div>
                 {this.renderShifts()}
+                {this.renderEditForm()}
             </div>
         )
     }

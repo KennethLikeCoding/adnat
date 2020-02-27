@@ -1,5 +1,6 @@
 import React from 'react'
 
+import { EditOrganisationComponent } from '../edit-organisation/edit-organisation';
 import { Button, Form, Grid, Segment } from 'semantic-ui-react';
 
 import './not-employed.css';
@@ -15,11 +16,16 @@ export class NotEmployedComponent extends React.Component {
             orgs: [],
             displayOrgs: true,
             orgName: null,
-            rate: null
+            rate: null,
+            orgIndex: null
         };
     }
 
     componentDidMount() {
+        this.loadOrgs();
+    }
+
+    loadOrgs() {
         let headers = this.getHeaders();
         axios.get(env.BASE_URL + 'organisations', headers).then(
             resp => {
@@ -67,10 +73,10 @@ export class NotEmployedComponent extends React.Component {
         )
     }
 
-    handleEdit(org) {
-        console.log(org);
+    handleEdit(i) {
+        this.setState({...this.state, orgIndex: i});
     }
-
+    
     handleJoin(orgId) {
         let body = {organisationId: orgId}
         axios.post(env.BASE_URL + 'organisations/join', body, this.getHeaders()).then(
@@ -82,7 +88,7 @@ export class NotEmployedComponent extends React.Component {
     renderEachOrg() {
         return this.state.orgs.map(
             (org, i) => {
-                return (<li key={i} className="item">{org.name} <a className="edit-join pl--1" onClick={() => this.handleEdit(org)}>Edit</a> <a className="edit-join pl--0_5" onClick={()=>this.handleJoin(org.id)}>Join</a></li>) 
+                return (<li key={i} className="item">{org.name} <span className="edit-join pl--1" onClick={() => this.handleEdit(i)}>Edit</span> <span className="edit-join pl--0_5" onClick={()=>this.handleJoin(org.id)}>Join</span></li>) 
             }
         )
     }
@@ -120,6 +126,18 @@ export class NotEmployedComponent extends React.Component {
         })
     }
 
+    handleUpdatedOrg = () => {
+        this.setState({...this.state, orgIndex: null});
+        this.loadOrgs();
+    }
+
+    renderEditForm() {
+        let i = this.state.orgIndex;
+        if (i!==null) {
+            return (<EditOrganisationComponent org={this.state.orgs[i]} sessionId={this.state.sessionId} onSubmit={this.handleUpdatedOrg} />)
+        }
+    }
+
     render() {
         return (
             <div>
@@ -129,6 +147,7 @@ export class NotEmployedComponent extends React.Component {
                     <Button onClick={this.newOrgHandler} className="item new-org">New Organisation</Button>
                 </div>
                 {this.renderOrgs()}
+                {this.renderEditForm()}
             </div>
         )
     }

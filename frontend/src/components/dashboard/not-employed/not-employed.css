@@ -2,5 +2,8 @@
 .edit-join:hover {
     cursor: pointer;
     text-decoration: underline;
-    
+}
+
+.edit-join {
+    color: blue;
 }
