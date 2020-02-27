@@ -17,6 +17,18 @@ router.get("/", (req, res) =>
     .then(orgs => res.json(orgs))
 );
 
+router.get("/:org_id", (req, res) => {
+  const org_id = req.params.org_id;
+  DB.get("SELECT * FROM organisations WHERE id = ?", org_id).then(
+    org => {
+      if (!org) {
+        throw { statusCode: 404 };
+      }
+      res.json({ id: org.id, name: org.name, hourlyRate: org.hourly_rate });
+    }
+  )
+})
+
 router.post("/join", (req, res) => {
   const { organisationId } = req.body;
 
