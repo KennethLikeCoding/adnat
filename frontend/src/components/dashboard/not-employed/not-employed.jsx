@@ -2,6 +2,8 @@ import React from 'react'
 
 import { Button, Form, Grid, Segment } from 'semantic-ui-react';
 
+import './not-employed.css';
+
 const axios = require('axios')
 const env = require('../../../environment').environment;
 
@@ -65,18 +67,33 @@ export class NotEmployedComponent extends React.Component {
         )
     }
 
+    handleEdit(org) {
+        console.log(org);
+    }
+
+    handleJoin(orgId) {
+        let body = {organisationId: orgId}
+        axios.post(env.BASE_URL + 'organisations/join', body, this.getHeaders()).then(
+            resp => {
+                this.props.onOrgChange(resp.data);
+            })
+    }
+
+    renderEachOrg() {
+        return this.state.orgs.map(
+            (org, i) => {
+                return (<li key={i} className="item">{org.name} <a className="edit-join pl--1" onClick={() => this.handleEdit(org)}>Edit</a> <a className="edit-join pl--0_5" onClick={()=>this.handleJoin(org.id)}>Join</a></li>) 
+            }
+        )
+    }
+
     renderExistingOrgs() {
         if (this.state.orgs.length === 0) {
             return (
                 <p>There is no organisation</p>
             )
-        } else {
-            return this.state.orgs.map(
-                (org, i) => {
-                    return <ul key={i}>{org.name}</ul>
-                }
-            )
-        }
+        } 
+        return (<ul>{this.renderEachOrg()}</ul>)
     }
 
     renderOrgs() {

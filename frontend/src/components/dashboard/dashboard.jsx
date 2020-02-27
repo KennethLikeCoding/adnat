@@ -55,11 +55,23 @@ export class DashboardComponent extends React.Component {
             return (<NotEmployedComponent sessionId={this.state.sessionId} onOrgChange={this.handleOrgChange} />)
         }
         let org = {id: this.state.orgId, name: this.state.orgName, rate: this.state.rate};
-        return (<EmployedComponent sessionId={this.state.sessionId} org={org}/>)
+        return (<EmployedComponent sessionId={this.state.sessionId} org={org} onOrgChange={this.handleOrgChange}/>)
     }
 
     handleOrgChange = (org) => {
-        this.setState({...this.state, orgId: org.id, orgName: org.name, rate: org.hourlyRate});
+        if (org) {
+            this.setState({...this.state, orgId: org.id, orgName: org.name, rate: org.hourlyRate});
+        } else {
+            this.setState({...this.state, orgId: null, orgName: null, rate: null});
+        }        
+    }
+
+    handleLogout = () => {
+        axios.delete(env.BASE_URL + 'auth/logout', this.getHeaders()).then(
+            resp => {
+                this.props.history.push('/');
+            }
+        )
     }
 
     render() {
@@ -67,7 +79,10 @@ export class DashboardComponent extends React.Component {
             return (
                 <div className="ui container pt--2">
                     <h1 className="adnat-title">Adnat</h1>
-                    <p>Logged in as {this.state.username}</p>
+                    <p>
+                        Logged in as {this.state.username}
+                        <span className="ml--5"><button onClick={this.handleLogout} className="ui grey basic mini button">Logout</button></span>
+                    </p>
                     {this.renderMainContent()}
                 </div>
             )

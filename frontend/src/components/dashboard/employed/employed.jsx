@@ -1,7 +1,5 @@
 import React from 'react';
 
-import { Button } from 'semantic-ui-react';
-
 const axios = require('axios');
 const env = require('../../../environment').environment;
 
@@ -16,8 +14,7 @@ export class EmployedComponent extends React.Component {
             shifts: [],
             //buttons
             viewShift: false,
-            edit: false,
-            leave: false
+            edit: false
         };
     }
 
@@ -34,17 +31,20 @@ export class EmployedComponent extends React.Component {
     }
 
     handleViewShift = () => {
-        this.setState({...this.state, viewShift: true, edit: false, leave: false});
+        this.setState({...this.state, viewShift: true, edit: false});
     }
 
     handleEdit = () => {
-        this.setState({...this.state, viewShift: false, edit: true, leave: false});
+        this.setState({...this.state, viewShift: false, edit: true});
     }
 
     handleLeave = () => {
-        this.setState({...this.state, viewShift: false, edit: false, leave: true});
+        axios.post(env.BASE_URL + 'organisations/leave', null, this.getHeaders()).then(
+            (resp) => {
+                this.props.onOrgChange(null);             
+            }
+        )
     }
-
 
     renderShifts() {
         if (this.state.viewShift) {
@@ -58,10 +58,10 @@ export class EmployedComponent extends React.Component {
         return (
             <div>
                 <h1><strong>{this.state.orgName}</strong></h1>
-                <div class="ui buttons">
-                    <button onClick={this.handleViewShift} className="ui green basic button"><i class="calendar outline icon"></i>View Shifts</button>
-                    <button onClick={this.handleEdit} className="ui blue basic button"><i class="edit outline icon"></i>Edit</button>
-                    <button onClick={this.handleLeave} className="ui red basic button"><i class="user times icon"></i>Leave</button>
+                <div className="ui buttons">
+                    <button onClick={this.handleViewShift} className="ui green basic button"><i className="calendar outline icon"></i>View Shifts</button>
+                    <button onClick={this.handleEdit} className="ui blue basic button"><i className="edit outline icon"></i>Edit</button>
+                    <button onClick={this.handleLeave} className="ui red basic button"><i className="user times icon"></i>Leave</button>
                 </div>
                 {this.renderShifts()}
             </div>
