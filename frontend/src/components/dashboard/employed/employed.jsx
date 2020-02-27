@@ -2,6 +2,8 @@ import React from 'react';
 
 import { EditOrganisationComponent } from '../edit-organisation/edit-organisation';
 
+import './employed.css'
+
 const axios = require('axios');
 const env = require('../../../environment').environment;
 
@@ -16,7 +18,12 @@ export class EmployedComponent extends React.Component {
             shifts: [],
             //buttons
             viewShift: false,
-            edit: false
+            edit: false,
+            //new shift
+            date: null,
+            start: null,
+            finish: null,
+            break: 0
         };
     }
 
@@ -48,10 +55,87 @@ export class EmployedComponent extends React.Component {
         )
     }
 
+    submitShift = () => {
+        let body = {
+            userId: this.props.user.id,
+            start: this.state.date + " " + this.state.start,
+            finish: this.state.date + " " +this.state.finish,
+            breakLength: this.state.breakLength
+        }
+        axios.post(env.BASE_URL + 'shifts', body, this.getHeaders()).then(
+            (resp) => {
+                let shiftsCopy =[...this.state.shifts];
+                shiftsCopy.push(resp.data);
+                this.setState({...this.state, shifts: shiftsCopy});
+            }
+        )
+    }
+
+    onDateChange = (event) => {
+        this.setState({...this.state, date: event.target.value})
+    }
+
+    onStartChange = (event) => {
+        this.setState({...this.state, start: event.target.value})
+    }
+
+    onFinishChange = (event) => {
+        this.setState({...this.state, finish: event.target.value})
+    }
+
+    onBreakChange = (event) => {
+        this.setState({...this.state, breakLength: event.target.value})
+    }
+
+    listShifts() {
+        return this.state.shifts.map(
+            (shift, i) => {
+                let start = shift.start.split(' ');
+                let finish = shift.finish.split(' ');
+
+                return (
+                    <tr key={i}>
+                        <td>{shift.userId}</td>
+                        <td>{start[0]}</td>
+                        <td>{start[1]}</td>
+                        <td>{finish[1]}</td>
+                        <td>{shift.breakLength}</td>
+                        <td>0</td>
+                        <td>0</td>
+                    </tr>
+                )
+            }
+        )
+    }
+    
     renderShifts() {
         if (this.state.viewShift) {
             return (
-                <p>You are viewing shifts</p>
+                <table className="ui table">
+                    <thead>
+                        <tr>
+                            <th>Employee name</th>
+                            <th>Shift date</th>
+                            <th>Start time</th>
+                            <th>Finish time</th>
+                            <th>Break length (minutes)</th>
+                            <th>Hours worked</th>
+                            <th>Shift cost</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {this.listShifts()}
+                        <tr>
+                            <td>{this.props.user.name}</td>
+                            <td><input onChange={this.onDateChange} type="date" /></td>
+                            <td><input onChange={this.onStartChange} type="time" /></td>
+                            <td><input onChange={this.onFinishChange} type="time" /></td>
+                            <td><input onChange={this.onBreakChange} type="number" /></td>
+                            <td><button onClick={this.submitShift} className="mini ui basic button">Create Shift</button></td>
+                            <td></td>
+                        </tr>
+                    </tbody>
+                    </table>
             )
         }
     }

@@ -55,7 +55,8 @@ export class DashboardComponent extends React.Component {
             return (<NotEmployedComponent sessionId={this.state.sessionId} onOrgChange={this.handleOrgChange} />)
         }
         let org = {id: this.state.orgId, name: this.state.orgName, rate: this.state.rate};
-        return (<EmployedComponent sessionId={this.state.sessionId} org={org} onOrgChange={this.handleOrgChange}/>)
+        let user = {id: this.state.userId, name: this.state.username}
+        return (<EmployedComponent sessionId={this.state.sessionId} org={org} user={user} onOrgChange={this.handleOrgChange}/>)
     }
 
     handleOrgChange = (org) => {

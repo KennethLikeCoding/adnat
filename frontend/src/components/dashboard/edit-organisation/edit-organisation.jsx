@@ -34,12 +34,12 @@ export class EditOrganisationComponent extends React.Component {
     }
 
     handleCancel = () => {
-        this.props.onSubmit();
+        this.props.onSubmit(this.state);
     }
 
     render() {
         return (
-            <form className="ui form edit-form">
+            <form className="ui form edit-form pt--2">
                 <div className="field">
                     <label>Organisation</label>
                     <input onChange={this.onNameChange} type="text" value={this.state.name} />
