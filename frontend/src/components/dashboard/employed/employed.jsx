@@ -22,7 +22,7 @@ export class EmployedComponent extends React.Component {
             date: null,
             start: null,
             finish: null,
-            break: 0
+            breakLength: 0
         };
     }
 
@@ -73,6 +73,7 @@ export class EmployedComponent extends React.Component {
         axios.post(env.BASE_URL + 'shifts', body, this.getHeaders()).then(
             (resp) => {
                 let shiftsCopy =[...this.state.shifts];
+                resp.data['username'] = this.props.user.name;
                 shiftsCopy.push(resp.data);
                 this.setState({...this.state, shifts: shiftsCopy});
             }
@@ -119,7 +120,7 @@ export class EmployedComponent extends React.Component {
                         <td>{finish[1]}</td>
                         <td>{shift.breakLength}</td>
                         <td>{hours}</td>
-                        <td>{hours * this.state.rate}</td>
+                        <td>${hours * this.state.rate}</td>
                     </tr>
                 )
             }
