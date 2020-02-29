@@ -26,6 +26,23 @@ router.get("/", (req, res) => {
   );
 });
 
+router.get("/id/:user_id", (req, res) => {
+  const user_id = req.params.user_id;
+  DB.get("SELECT * FROM users WHERE id = ?", user_id).then(
+    user => {
+      if (!user) {
+        throw { statusCode: 404 };
+      }
+      res.json({ 
+        id: user.id, 
+        name: user.name, 
+        organisationId: user.organisationId, 
+        email: user.email 
+      });
+    }
+  )
+})
+
 router.get("/me", (req, res) =>
   res.json({
     id: req.user.id,
