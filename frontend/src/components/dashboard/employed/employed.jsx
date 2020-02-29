@@ -1,5 +1,4 @@
 import React from 'react';
-
 import { EditOrganisationComponent } from '../edit-organisation/edit-organisation';
 
 import './employed.css'
@@ -100,8 +99,19 @@ export class EmployedComponent extends React.Component {
     listShifts() {
         return this.state.shifts.map(
             (shift, i) => {
-                let start = shift.start.split(' ');
-                let finish = shift.finish.split(' ');
+                const start = shift.start.split(' ');
+                const finish = shift.finish.split(' ');
+                
+                const startHM = start[1].split(':');
+                const finishHM = finish[1].split(':');
+                const startHour = parseInt(startHM[0]) + parseInt(startHM[1])/60
+                const endHour = parseInt(finishHM[0]) + parseInt(finishHM[1])/60
+                let hours = endHour - startHour - shift.breakLength/60;
+                const j = hours.toString().indexOf('.');
+                if (j != -1 && hours.toString().split('.')[1].length > 1) {
+                    hours = hours.toFixed(2)    
+                }
+
                 return (
                     <tr key={i}>
                         <td>{shift.username}</td>
@@ -109,8 +119,8 @@ export class EmployedComponent extends React.Component {
                         <td>{start[1]}</td>
                         <td>{finish[1]}</td>
                         <td>{shift.breakLength}</td>
-                        <td>0</td>
-                        <td>0</td>
+                        <td>{hours}</td>
+                        <td>{hours * this.state.rate}</td>
                     </tr>
                 )
             }
