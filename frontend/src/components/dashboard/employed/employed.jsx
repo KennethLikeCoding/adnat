@@ -96,6 +96,16 @@ export class EmployedComponent extends React.Component {
         this.setState({...this.state, breakLength: event.target.value})
     }
 
+    deleteShift(shift_id, i) {
+        axios.delete(env.BASE_URL + 'shifts/'+shift_id, this.getHeaders()).then(
+            resp => {
+                let shifts = [...this.state.shifts];
+                shifts.splice(i, 1);
+                this.setState({...this.state, shifts: shifts});
+            }
+        )
+    }
+
     listShifts() {
         return this.state.shifts.map(
             (shift, i) => {
@@ -124,6 +134,7 @@ export class EmployedComponent extends React.Component {
                         <td>{shift.breakLength}</td>
                         <td>{hours}</td>
                         <td>${hours * this.state.rate}</td>
+                        <td><button onClick={()=>this.deleteShift(shift.id, i)} className="mini ui basic orange button">Delete</button></td>
                     </tr>
                 )
             }
@@ -143,6 +154,7 @@ export class EmployedComponent extends React.Component {
                             <th>Break length (minutes)</th>
                             <th>Hours worked</th>
                             <th>Shift cost</th>
+                            <th>Action</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -154,6 +166,7 @@ export class EmployedComponent extends React.Component {
                             <td><input onChange={this.onFinishChange} type="time" /></td>
                             <td><input onChange={this.onBreakChange} type="number" /></td>
                             <td><button onClick={this.submitShift} className="mini ui basic button">Create Shift</button></td>
+                            <td></td>
                             <td></td>
                         </tr>
                     </tbody>
