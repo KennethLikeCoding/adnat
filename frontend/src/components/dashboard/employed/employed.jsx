@@ -107,6 +107,9 @@ export class EmployedComponent extends React.Component {
                 const startHour = parseInt(startHM[0]) + parseInt(startHM[1])/60
                 const endHour = parseInt(finishHM[0]) + parseInt(finishHM[1])/60
                 let hours = endHour - startHour - shift.breakLength/60;
+                if (hours < 0) {
+                    hours = 24 - startHour + endHour
+                }
                 const j = hours.toString().indexOf('.');
                 if (j !== -1 && hours.toString().split('.')[1].length > 1) {
                     hours = hours.toFixed(2)    
