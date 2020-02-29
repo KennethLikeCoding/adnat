@@ -39,9 +39,9 @@ export class DashboardComponent extends React.Component {
                     })
                     let orgId = resp.data.organisationId
                     if (orgId) {
-                        axios.get(env.BASE_URL + 'organisations/?org_id='+orgId, headers).then(
+                        axios.get(env.BASE_URL + 'organisations/'+orgId, headers).then(
                             resp => {
-                                let org = resp.data[0];
+                                let org = resp.data;
                                 this.setState({...this.state, orgId: org.id, orgName: org.name, rate: org.hourlyRate});
                             }
                         )

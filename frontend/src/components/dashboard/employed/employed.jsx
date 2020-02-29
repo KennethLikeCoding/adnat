@@ -34,6 +34,16 @@ export class EmployedComponent extends React.Component {
     componentDidMount() {
         axios.get(env.BASE_URL + 'shifts', this.getHeaders()).then(
             (resp) => {
+                resp.data.map(
+                    shift => {
+                        axios.get(env.BASE_URL + 'users/id/' + shift.userId, this.getHeaders()).then(
+                            resp => {
+                                shift['username'] = resp.data.name
+                            }
+                        )
+                    }
+                )
+
                 this.setState({...this.state, shifts: resp.data})
             }
         )
@@ -92,10 +102,9 @@ export class EmployedComponent extends React.Component {
             (shift, i) => {
                 let start = shift.start.split(' ');
                 let finish = shift.finish.split(' ');
-
                 return (
                     <tr key={i}>
-                        <td>{shift.userId}</td>
+                        <td>{shift.username}</td>
                         <td>{start[0]}</td>
                         <td>{start[1]}</td>
                         <td>{finish[1]}</td>
