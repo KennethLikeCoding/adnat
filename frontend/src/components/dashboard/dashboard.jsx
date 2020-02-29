@@ -3,10 +3,10 @@ import './dashboard.css';
 
 import { EmployedComponent } from './employed/employed';
 import { NotEmployedComponent } from './not-employed/not-employed';
+import { EditUserComponent } from './edit-user/edit-user';
 
 const axios = require('axios')
 const env = require('../../environment').environment;
-
 
 export class DashboardComponent extends React.Component {
     constructor(props) {
@@ -18,7 +18,9 @@ export class DashboardComponent extends React.Component {
             email: null,
             orgId: null,
             orgName: null,
-            rate: null
+            rate: null,
+            //edit user screen
+            editUser: false
         };
     }
 
@@ -51,6 +53,9 @@ export class DashboardComponent extends React.Component {
     }
 
     renderMainContent() {
+        if (this.state.editUser) {
+            return;
+        }
         if (!this.state.orgId) {
             return (<NotEmployedComponent sessionId={this.state.sessionId} onOrgChange={this.handleOrgChange} />)
         }
@@ -75,6 +80,24 @@ export class DashboardComponent extends React.Component {
         )
     }
 
+    handleEdit = () => {
+        this.setState({...this.state, editUser: true});
+    }
+
+    handleUserChange = (user) => {
+        this.setState({...this.state, username: user.name, email: user.email});
+    }
+
+    handleExitEditPage = () => {
+        this.setState({...this.state, editUser: false});
+    }
+    renderEditUser() {
+        if (this.state.editUser) {
+            const user = {id: this.state.userId, name: this.state.username, email: this.state.email};
+            return (<EditUserComponent user={user} onUserChange={this.handleUserChange} onExit={this.handleExitEditPage} headers={this.getHeaders()}/>)
+        }
+    }
+
     render() {
         if (this.state.username) {
             return (
@@ -82,9 +105,11 @@ export class DashboardComponent extends React.Component {
                     <h1 className="adnat-title">Adnat</h1>
                     <p>
                         Logged in as {this.state.username}
-                        <span className="ml--5"><button onClick={this.handleLogout} className="ui grey basic mini button">Logout</button></span>
+                        {(!this.state.editUser) && (<span className="ml--2"><button onClick={this.handleEdit} className="ui blue basic mini button">Edit</button></span>)}
+                        <span className="ml--2"><button onClick={this.handleLogout} className="ui grey basic mini button">Logout</button></span>
                     </p>
                     {this.renderMainContent()}
+                    {this.renderEditUser()}
                 </div>
             )
         }

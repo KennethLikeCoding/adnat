@@ -33,7 +33,7 @@ export class EmployedComponent extends React.Component {
     componentDidMount() {
         axios.get(env.BASE_URL + 'shifts', this.getHeaders()).then(
             (resp) => {
-                resp.data.map(
+                resp.data.forEach(
                     shift => {
                         axios.get(env.BASE_URL + 'users/id/' + shift.userId, this.getHeaders()).then(
                             resp => {
@@ -42,7 +42,6 @@ export class EmployedComponent extends React.Component {
                         )
                     }
                 )
-
                 this.setState({...this.state, shifts: resp.data})
             }
         )
@@ -108,7 +107,7 @@ export class EmployedComponent extends React.Component {
                 const endHour = parseInt(finishHM[0]) + parseInt(finishHM[1])/60
                 let hours = endHour - startHour - shift.breakLength/60;
                 const j = hours.toString().indexOf('.');
-                if (j != -1 && hours.toString().split('.')[1].length > 1) {
+                if (j !== -1 && hours.toString().split('.')[1].length > 1) {
                     hours = hours.toFixed(2)    
                 }
 
