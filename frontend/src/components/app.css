@@ -137,3 +137,8 @@
 .w--100 {
     width: 100%;
 }
+
+.flex-row {
+    display: flex;
+    flex-direction: row;
+}

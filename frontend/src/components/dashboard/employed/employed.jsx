@@ -22,7 +22,11 @@ export class EmployedComponent extends React.Component {
             date: null,
             start: null,
             finish: null,
-            breakLength: 0
+            breakLength: 0,
+            //edit shift
+            editShift: false,
+            shiftId: null,
+            shiftIndex: null
         };
     }
 
@@ -31,7 +35,7 @@ export class EmployedComponent extends React.Component {
     }
 
     componentDidMount() {
-        axios.get(env.BASE_URL + 'shifts', this.getHeaders()).then(
+         axios.get(env.BASE_URL + 'shifts', this.getHeaders()).then(
             (resp) => {
                 resp.data.forEach(
                     shift => {
@@ -106,19 +110,25 @@ export class EmployedComponent extends React.Component {
         )
     }
 
+    editShift(shift_id, i) {
+        let shift = this.state.shifts[i];
+        const start = shift.start.split(' ');
+        const finish = shift.finish.split(' ');
+        this.setState({editShift: true, shiftId: shift_id, shiftIndex: i, date: start[0], start: start[1], finish: finish[1], breakLength: shift.breakLength});
+    }
+
     listShifts() {
         return this.state.shifts.map(
             (shift, i) => {
                 const start = shift.start.split(' ');
                 const finish = shift.finish.split(' ');
-                
                 const startHM = start[1].split(':');
                 const finishHM = finish[1].split(':');
                 const startHour = parseInt(startHM[0]) + parseInt(startHM[1])/60
                 const endHour = parseInt(finishHM[0]) + parseInt(finishHM[1])/60
                 let hours = endHour - startHour - shift.breakLength/60;
                 if (hours < 0) {
-                    hours = 24 - startHour + endHour
+                    hours = 24 - startHour + endHour - shift.breakLength/60;
                 }
                 const j = hours.toString().indexOf('.');
                 if (j !== -1 && hours.toString().split('.')[1].length > 1) {
@@ -134,15 +144,69 @@ export class EmployedComponent extends React.Component {
                         <td>{shift.breakLength}</td>
                         <td>{hours}</td>
                         <td>${hours * this.state.rate}</td>
-                        <td><button onClick={()=>this.deleteShift(shift.id, i)} className="mini ui basic orange button">Delete</button></td>
+                        <td className="flex-row">
+                            <span><button onClick={()=>this.editShift(shift.id, i)} className="mini ui basic grey button">Edit</button></span>
+                            <span><button onClick={()=>this.deleteShift(shift.id, i)} className="mini ui basic brown button">Delete</button></span>
+                        </td>
                     </tr>
                 )
             }
         )
     }
     
+    handleEditShiftSubmit = (event) => {
+        event.preventDefault();
+        const start = this.state.date + " " + this.state.start;
+        const finish = this.state.date + " " + this.state.finish;
+        const shift = {start: start, finish: finish, breakLength: this.state.breakLength};
+        axios.put(env.BASE_URL + 'shifts/' + this.state.shiftId, shift, this.getHeaders()).then(
+            (resp) => {
+                let shifts = [...this.state.shifts];
+                const i = this.state.shiftIndex;
+                shifts[i].start = start;
+                shifts[i].finish = finish;
+                shifts[i].breakLength = this.state.breakLength;
+                this.setState({editShift: false, shifts: shifts, start: null, finish: null, breakLength: 0});
+            }
+        )
+    }
+
+    renderEditShift() {
+        const i = this.state.shiftIndex;
+        const shift = this.state.shifts[i];
+        if (this.state.editShift) {
+            return (
+                <form className="ui form edit-form pt--2">
+                    <h3 className="ui dividing header">Edit Shift {shift.id}</h3>
+                    <div className="field">
+                        <label>Employee name</label>
+                        <span>{shift.username}</span>
+                    </div>
+                    <div className="field">
+                        <label>Shift date</label>
+                        <input type="date" onChange={(e)=>this.setState({date: e.target.value})} value={this.state.date}/>
+                    </div>
+                    <div className="field">
+                        <label>Start time</label>
+                        <input type="time" onChange={(e)=>this.setState({start: e.target.value})} value={this.state.start}/>
+                    </div>
+                    <div className="field">
+                        <label>Finish time</label>
+                        <input type="time" onChange={(e)=>this.setState({finish: e.target.value})} value={this.state.finish}/>
+                    </div>
+                    <div className="field">
+                        <label>Break length (minutes)</label>
+                        <input type="number" onChange={(e)=>this.setState({breakLength: e.target.value})} value={this.state.breakLength}/>
+                    </div>
+                    <button onClick={this.handleEditShiftSubmit} className="ui green basic button">Submit</button>
+                    <button onClick={()=>this.setState({editShift: false})} className="ui grey basic button">Cancel</button>
+                </form>
+            )
+        }
+    }
+
     renderShifts() {
-        if (this.state.viewShift) {
+        if (this.state.viewShift && !this.state.editShift) {
             return (
                 <table className="ui table">
                     <thead>
@@ -205,6 +269,7 @@ export class EmployedComponent extends React.Component {
                     </div>
                 )}
                 {this.renderShifts()}
+                {this.renderEditShift()}
                 {this.renderEditForm()}
             </div>
         )
