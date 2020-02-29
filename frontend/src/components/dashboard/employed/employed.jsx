@@ -173,15 +173,24 @@ export class EmployedComponent extends React.Component {
         }
     }
 
+    handleHome = () => {
+        this.setState({...this.state, viewShift: false, edit: false});
+    }
+
     render() {
         return (
             <div>
                 <h1><strong>{this.state.orgName}</strong></h1>
-                <div className="ui buttons">
-                    <button onClick={this.handleViewShift} className="ui green basic button"><i className="calendar outline icon"></i>View Shifts</button>
-                    <button onClick={this.handleEdit} className="ui blue basic button"><i className="edit outline icon"></i>Edit</button>
-                    <button onClick={this.handleLeave} className="ui red basic button"><i className="user times icon"></i>Leave</button>
-                </div>
+                {(this.state.viewShift || this.state.edit) && (
+                    <button onClick={this.handleHome} className="ui teal basic button">Home</button>
+                )}
+                {!this.state.viewShift && !this.state.edit && (
+                    <div className="ui buttons">
+                        <button onClick={this.handleViewShift} className="ui green basic button"><i className="calendar outline icon"></i>View Shifts</button>
+                        <button onClick={this.handleEdit} className="ui blue basic button"><i className="edit outline icon"></i>Edit</button>
+                        <button onClick={this.handleLeave} className="ui red basic button"><i className="user times icon"></i>Leave</button>
+                    </div>
+                )}
                 {this.renderShifts()}
                 {this.renderEditForm()}
             </div>
