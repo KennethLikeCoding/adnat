@@ -13,6 +13,10 @@ export class EditUserComponent extends React.Component {
             currentPassword: "",
             newPassword: "",
             newPasswordConfirmation: "",
+            incomplete: false,
+            shortPassword: false,
+            mismatch: false,
+            error: false,
             // buttons
             changeProfile: false,
             changePassword: false
@@ -36,8 +40,20 @@ export class EditUserComponent extends React.Component {
 
     handleSubmitPwReset = (event) => {
         event.preventDefault();
+        if (this.state.newPassword === "" || this.state.oldPassword ==="" || this.state.newPasswordConfirmation === "") {
+            this.setState({incomplete: true})
+            return;
+        }
+        if (this.state.newPassword !== this.state.newPasswordConfirmation) {
+            this.setState({mismatch: true})
+            return;
+        }
+        if (this.state.newPassword.length < 6) {
+            this.setState({shortPassword: true})
+            return;
+        }
         const body = {
-            "oldPassword": this.state.currentPassword, 
+            "oldPassword": this.state.currentPassword,
             "newPassword": this.state.newPassword,
             "newPasswordConfirmation": this.state.newPasswordConfirmation
         }
@@ -45,12 +61,26 @@ export class EditUserComponent extends React.Component {
             resp => {
                 this.setState({changePassword: false});
         })
+        .catch((error) => {
+            this.setState({error: true});
+        }) 
     }
 
     handleCancelPwReset = () => {
         this.setState({changePassword: false, currentPassword: "", newPassword: "", newPasswordConfirmation: "",});
     }
 
+    handleCurrPwChange = (event) => {
+        this.setState({currentPassword: event.target.value, incomplete: false, mismatch: false, error: false})
+    }
+    
+    handleNewPwChange = (event) => {
+        this.setState({newPassword: event.target.value, incomplete: false, shortPassword: false, mismatch: false})
+    }
+
+    handleNewPwConfChange = (event) => {
+        this.setState({newPasswordConfirmation: event.target.value, incomplete: false, shortPassword: false, mismatch: false})
+    }
     // -------------------------------------- end of listeners -------------------------------------------------------------
 
 
@@ -76,26 +106,44 @@ export class EditUserComponent extends React.Component {
         }
     }
 
+    renderResetPwErrorMsg() {
+        if (this.state.incomplete) {
+            return(<div className="ui red message">Please complete the form</div>)
+        }
+        if (this.state.shortPassword) {
+            return (<div className="ui red message">Password must contain at least 6 characters</div>)
+        }
+        if (this.state.mismatch) {
+            return (<div className="ui red message">Password don't match</div>)
+        }
+        if (this.state.error) {
+            return (<div className="ui red message">You current password is incorrect</div>)
+        }
+    }
+
     renderChangePasswordForm() {
         if (this.state.changePassword) {
             return (
-                <form className="ui form edit-form pt--2">
-                    <h3 className="ui dividing header">Reset Password</h3>
-                    <div className="field">
-                        <label>Current password</label>
-                        <input onChange={(e)=>this.setState({currentPassword: e.target.value})} type="password" />
-                    </div>
-                    <div className="field">
-                        <label>New password</label>
-                        <input onChange={(e)=>this.setState({newPassword: e.target.value})} type="password" value={this.state.newPassword}/>
-                    </div>
-                    <div className="field">
-                        <label>New password confirmation</label>
-                        <input onChange={(e)=>this.setState({newPasswordConfirmation: e.target.value})} type="password" value={this.state.newPasswordConfirmation}/>
-                    </div>
-                    <button onClick={this.handleSubmitPwReset} className="ui green basic button">Submit</button>
-                    <button onClick={this.handleCancelPwReset} className="ui grey basic button">Cancel</button>
-                </form>
+                <div>
+                    <form className="ui form edit-form pt--2">
+                        <h3 className="ui dividing header">Reset Password</h3>
+                        <div className="field">
+                            <label>Current password</label>
+                            <input onChange={this.handleCurrPwChange} type="password" />
+                        </div>
+                        <div className="field">
+                            <label>New password</label>
+                            <input onChange={this.handleNewPwChange} type="password" value={this.state.newPassword}/>
+                        </div>
+                        <div className="field">
+                            <label>New password confirmation</label>
+                            <input onChange={this.handleNewPwConfChange} type="password" value={this.state.newPasswordConfirmation}/>
+                        </div>
+                        <button onClick={this.handleSubmitPwReset} className="ui green basic button">Submit</button>
+                        <button onClick={this.handleCancelPwReset} className="ui grey basic button">Cancel</button>
+                    </form>
+                    {this.renderResetPwErrorMsg()}
+                </div>
             )
         }
     }

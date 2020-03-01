@@ -87,7 +87,7 @@ export class LoginComponent extends React.Component {
                     <div className="ui red message login-error">Incorrect username or password</div>
                 )}
                 {this.state.incomplete && (
-                    <div className="ui red message login-error">Please fill out both email an password</div>
+                    <div className="ui red message login-error">Please fill out both email and password</div>
                 )}
             </div>
         )

@@ -15,9 +15,11 @@ export class NotEmployedComponent extends React.Component {
             sessionId: props.sessionId,
             orgs: [],
             displayOrgs: true,
-            orgName: null,
-            rate: null,
-            orgIndex: null
+            orgIndex: null,
+            // create org form
+            orgName: "",
+            rate: "",
+            incomplete: false
         };
     }
 
@@ -65,6 +67,10 @@ export class NotEmployedComponent extends React.Component {
     }
 
     submit = () => {
+        if (this.state.orgName === "" || this.state.rate === "") {
+            this.setState({incomplete: true});
+            return;
+        }
         let body = {name: this.state.orgName, hourlyRate: this.state.rate};
         let headers = this.getHeaders();
         axios.post(env.BASE_URL + 'organisations/create_join', body, headers).then(
@@ -83,17 +89,14 @@ export class NotEmployedComponent extends React.Component {
     renderCreateOrg() {
         return (
             <div>
-                <Grid textAlign='center'>
-                    <Grid.Column className="w--100">
-                        <Form size='large'>
-                            <Segment>
-                                <Form.Input onChange={(e)=>this.setState({orgName: e.target.value})} fluid icon='user' iconPosition='left' placeholder="Name e.g Bob's burger" />
-                                <Form.Input onChange={(e)=>this.setState({rate: e.target.value})} fluid icon='dollar sign' iconPosition='left' placeholder='Hourly Rate' />
-                                <Button color='teal' onClick={this.submit} fluid size='large'>Create and Join</Button>
-                            </Segment>
-                        </Form>
-                    </Grid.Column>
-                </Grid>
+                <Form size='large'>
+                    <Segment>
+                        <Form.Input onChange={(e)=>this.setState({orgName: e.target.value, incomplete: false})} fluid icon='user' iconPosition='left' placeholder="Name e.g Bob's burger" />
+                        <Form.Input onChange={(e)=>this.setState({rate: e.target.value, incomplete: false})} fluid icon='dollar sign' iconPosition='left' placeholder='Hourly Rate' />
+                        <Button color='teal' onClick={this.submit} fluid size='large'>Create and Join</Button>
+                    </Segment>
+                </Form>
+                {this.state.incomplete && (<div className="ui red message">Please complete the form</div>)}
             </div>
         )
     }
