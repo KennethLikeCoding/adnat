@@ -127,9 +127,48 @@ export class EmployedComponent extends React.Component {
                 const startHour = parseInt(startHM[0]) + parseInt(startHM[1])/60
                 const endHour = parseInt(finishHM[0]) + parseInt(finishHM[1])/60
                 let hours = endHour - startHour - shift.breakLength/60;
-                if (hours < 0) {
+                let cost = hours * this.state.rate;
+
+                const day1 = start[0].split('-');
+                
+                const d1 = new Date(day1[0], day1[1] - 1, day1[2], 0, 0, 0, 0)
+                let overnight = false;
+                // calculate hours and cost (no penalty) for overnight shift
+                  if (hours < 0) {
+                    overnight = true;
                     hours = 24 - startHour + endHour - shift.breakLength/60;
+                    cost = this.state.rate * hours;
                 }
+
+                // There are three cases where penalty rates may apply, which will overwrite the cost calculation above
+                
+                // case 1: start and finish are both on the same day (Sunday)
+                if (!overnight && d1.getDay()===0) {
+                    cost *= 2;
+                }
+                // case 2: start on Sunday, finish on Monday
+                if (overnight && d1.getDay()===0) {
+                    const normalHours = endHour - shift.breakLength/60;
+                    let penaltyHours = 24 - startHour;
+                    if (normalHours < 0) {
+                        penaltyHours += normalHours;
+                        cost = penaltyHours * this.state.rate * 2;
+                    } else {
+                        cost = this.state.rate * (normalHours + penaltyHours * 2)
+                    }
+                }
+                // case 3: start on Saturday, finish on Sunday
+                if (overnight && d1.getDay()===6) {
+                    const penaltyHours = endHour - shift.breakLength/60;
+                    let normalHours = 24 - startHour;
+                    if (penaltyHours < 0) {
+                        normalHours += penaltyHours;
+                        cost = normalHours * this.state.rate;
+                    } else {
+                        cost = this.state.rate * (normalHours + penaltyHours * 2)
+                    }
+                }
+                cost = cost.toFixed(2);
                 const j = hours.toString().indexOf('.');
                 if (j !== -1 && hours.toString().split('.')[1].length > 1) {
                     hours = hours.toFixed(2)    
@@ -143,7 +182,7 @@ export class EmployedComponent extends React.Component {
                         <td>{finish[1]}</td>
                         <td>{shift.breakLength}</td>
                         <td>{hours}</td>
-                        <td>${hours * this.state.rate}</td>
+                        <td>${cost}</td>
                         <td className="flex-row">
                             <span><button onClick={()=>this.editShift(shift.id, i)} className="mini ui basic grey button">Edit</button></span>
                             <span><button onClick={()=>this.deleteShift(shift.id, i)} className="mini ui basic brown button">Delete</button></span>
@@ -256,7 +295,7 @@ export class EmployedComponent extends React.Component {
 
     render() {
         return (
-            <div>
+            <div className="pb--5">
                 <h1><strong>{this.state.orgName}</strong></h1>
                 {(this.state.viewShift || this.state.edit) && (
                     <button onClick={this.handleHome} className="ui teal basic button">Home</button>
