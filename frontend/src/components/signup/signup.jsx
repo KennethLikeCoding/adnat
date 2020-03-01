@@ -1,6 +1,7 @@
 
 import React from 'react'
 
+import { Redirect } from 'react-router-dom';
 import { Button, Form, Grid, Header, Segment } from 'semantic-ui-react';
 
 import './signup.css';
@@ -12,44 +13,69 @@ export class SignupComponent extends React.Component {
     constructor(props) {
         super(props)
         this.state = {
+            // form fields
             name: "",
             email: "",
             password: "",
-            passwordConfirmation: ""
+            passwordConfirmation: "",
+                
+            sessionId: "",
+            // form validations
+            mismatch: false,
+            incomplete: false,
+            shortPassword: false,
+            error: false,
         }
     }
 
     onNameChange = (event) => {
-        this.setState({...this.state, name: event.target.value})
+        this.setState({name: event.target.value, incomplete: false, error: false})
     }
 
     onEmailChange = (event) => {
-        this.setState({...this.state, email: event.target.value})
+        this.setState({email: event.target.value, incomplete: false, error: false})
     }
 
     onPasswordChange = (event) => {
-        this.setState({...this.state, password: event.target.value})
+        this.setState({password: event.target.value, incomplete: false, error: false, mismatch: false, shortPassword: false})
     }
 
     onConfirmPasswordChange = (event) => {
-        this.setState({...this.state, passwordConfirmation: event.target.value})
+        this.setState({passwordConfirmation: event.target.value, incomplete: false, error: false, mismatch: false})
     }
 
     submit = () => {
-        if (this.state.password === this.state.passwordConfirmation) {
-            axios.post(env.BASE_URL + 'auth/signup', this.state)
-            .then((response) => {
-                let sessionId = response.data.sessionId
-            })
-            .catch((err) => {
-                console.log(err)
-            })
-        } 
+        if (this.state.name === "" || this.email === "" || this.password === "" || this.passwordConfirmation === "") {
+            this.setState({incomplete: true});
+            return;
+        }
+        if (this.state.password.length < 6) {
+            this.setState({shortPassword: true});
+            return;
+        }
+        if (this.state.password !== this.state.passwordConfirmation) {
+            this.setState({mismatch: true});
+            return;
+        }
+        const body = {
+            name: this.state.name, 
+            email: this.state.email, 
+            password: this.state.passwordConfirmation, 
+            passwordConfirmation: this.state.passwordConfirmation
+        }
+
+        axios.post(env.BASE_URL + 'auth/signup', body)
+        .then((resp) => {
+            this.setState({sessionId: resp.data.sessionId})
+        })
+        .catch((err) => {
+            this.setState({error: true});
+        })
     }
 
-    render() {
+    renderSignupForm() {
         return (
-            <Grid textAlign='center' className="grid" verticalAlign='middle'>
+            <Grid textAlign='center' className="grid">
                 <Grid.Column className="grid-column">
                     <Header as='h2' color='teal' textAlign='center'>
                         Sign up
@@ -65,6 +91,35 @@ export class SignupComponent extends React.Component {
                     </Form>
                 </Grid.Column>
             </Grid>
+        )
+    }
+
+    renderErrorMsg() {
+        if (this.state.mismatch) {
+            return (<div className="ui red message login-error">Password don't match</div>)
+        }
+        if (this.state.incomplete) {
+            return (<div className="ui red message login-error">Please complete the form</div>)
+        }
+        if (this.state.shortPassword) {
+            return (<div className="ui red message login-error">Password must contain at least 6 characters</div>)
+        }
+        if (this.state.error) {
+            return (<div className="ui red message login-error">Something's wrong. Please try again or contact support.</div>)
+        }
+    }
+
+    render() {
+        if (this.state.sessionId !== "") {
+            return (
+                <Redirect to={{ pathname: '/dashboard', state: { sessionId: this.state.sessionId } }}></Redirect>
+            )
+        }
+        return (
+            <div className="login-container">
+                {this.renderSignupForm()}
+                {this.renderErrorMsg()}
+            </div>
         )
     }
 }
