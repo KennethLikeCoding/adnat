@@ -74,7 +74,7 @@ export class NotEmployedComponent extends React.Component {
     }
 
     handleUpdatedOrg = () => {
-        this.setState({...this.state, orgIndex: null});
+        this.setState({orgIndex: null});
         this.loadOrgs();
     }
 

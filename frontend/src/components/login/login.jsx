@@ -19,11 +19,11 @@ export class LoginComponent extends React.Component {
     }
 
     onEmailChange = (event) => {
-        this.setState({...this.state, email: event.target.value})
+        this.setState({email: event.target.value})
     }
 
     onPasswordChange = (event) => {
-        this.setState({...this.state, password: event.target.value})
+        this.setState({password: event.target.value})
     }
 
     onSubmit = () => {
@@ -32,7 +32,7 @@ export class LoginComponent extends React.Component {
             password: this.state.password
         })
         .then((response) => {
-            this.setState({...this.state, sessionId: response.data.sessionId});
+            this.setState({sessionId: response.data.sessionId});
         })
         .catch((err) => {
             console.log(err)
