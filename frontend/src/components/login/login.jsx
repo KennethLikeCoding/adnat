@@ -14,19 +14,25 @@ export class LoginComponent extends React.Component {
         this.state = {
             email: "",
             password: "",
-            sessionId: ""
+            sessionId: "",
+            error: false,
+            incomplete: false
         }
     }
 
     onEmailChange = (event) => {
-        this.setState({email: event.target.value})
+        this.setState({email: event.target.value, error: false, incomplete: false});
     }
 
     onPasswordChange = (event) => {
-        this.setState({password: event.target.value})
+        this.setState({password: event.target.value, error: false, incomplete: false});
     }
 
     onSubmit = () => {
+        if (this.state.email === "" || this.state.password === "") {
+            this.setState({incomplete: true});
+            return;
+        }
         axios.post(env.BASE_URL + 'auth/login', {
             email: this.state.email,
             password: this.state.password
@@ -35,19 +41,14 @@ export class LoginComponent extends React.Component {
             this.setState({sessionId: response.data.sessionId});
         })
         .catch((err) => {
-            console.log(err)
+            this.setState({error: true});
         })
     }
 
-    render() {
-        if (this.state.sessionId !== "") {
-            return (
-                <Redirect to={{ pathname: '/dashboard', state: { sessionId: this.state.sessionId } }}></Redirect>
-            )
-        }
+    renderLoginForm() {
         return (
-            <Grid textAlign='center' className="grid" verticalAlign='middle'>
-                <Grid.Column className="grid-column">
+            <Grid textAlign='center' className="grid">
+                <Grid.Column>
                     <Header as='h2' color='teal' textAlign='center'>
                         Log-in to your account
                     </Header>
@@ -70,6 +71,25 @@ export class LoginComponent extends React.Component {
                     </Message>
                 </Grid.Column>
             </Grid>
+        )
+    }
+
+    render() {
+        if (this.state.sessionId !== "") {
+            return (
+                <Redirect to={{ pathname: '/dashboard', state: { sessionId: this.state.sessionId } }}></Redirect>
+            )
+        }
+        return (
+            <div className="login-container">
+                {this.renderLoginForm()}
+                {this.state.error && (
+                    <div className="ui red message login-error">Incorrect username or password</div>
+                )}
+                {this.state.incomplete && (
+                    <div className="ui red message login-error">Please fill out both email an password</div>
+                )}
+            </div>
         )
     }
 }
