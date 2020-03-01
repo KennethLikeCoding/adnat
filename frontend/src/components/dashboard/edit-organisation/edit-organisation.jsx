@@ -13,14 +13,6 @@ export class EditOrganisationComponent extends React.Component {
         };
     }
 
-    onNameChange = (event) => {
-        this.setState({...this.state, name: event.target.value});
-    }
-
-    onSalaryChange = (event) => {
-        this.setState({...this.state, hourlyRate: event.target.value});
-    }
-
     getHeaders() {
         return {headers: {'Authorization': this.props.sessionId, 'content-type': 'application/json'}};
     }
@@ -33,23 +25,19 @@ export class EditOrganisationComponent extends React.Component {
         })
     }
 
-    handleCancel = () => {
-        this.props.onSubmit(this.state);
-    }
-
     render() {
         return (
             <form className="ui form edit-form pt--2">
                 <div className="field">
                     <label>Organisation</label>
-                    <input onChange={this.onNameChange} type="text" value={this.state.name} />
+                    <input onChange={(e)=>this.setState({name: e.target.value})} type="text" value={this.state.name} />
                 </div>
                 <div className="field">
                     <label>Hourly Rate</label>
-                    <input onChange={this.onSalaryChange} type="number" value={this.state.hourlyRate}/>
+                    <input onChange={(e)=>this.setState({hourlyRate: e.target.value})} type="number" value={this.state.hourlyRate}/>
                 </div>
                 <button onClick={this.handleUpdate} className="ui green basic button">Update</button>
-                <button onClick={this.handleCancel} className="ui grey basic button">Cancel</button>
+                <button onClick={()=>this.props.onSubmit(this.state)} className="ui grey basic button">Cancel</button>
             </form>
         )
     }

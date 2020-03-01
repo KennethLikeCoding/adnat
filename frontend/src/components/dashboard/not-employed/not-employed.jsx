@@ -29,7 +29,7 @@ export class NotEmployedComponent extends React.Component {
         let headers = this.getHeaders();
         axios.get(env.BASE_URL + 'organisations', headers).then(
             resp => {
-                this.setState({...this.state, orgs: resp.data})
+                this.setState({orgs: resp.data})
         })
     }
 
@@ -37,8 +37,9 @@ export class NotEmployedComponent extends React.Component {
         return {headers: {'Authorization': this.state.sessionId, 'content-type': 'application/json'}};
     }
 
+    // --------------------------------------- Listeners ---------------------------------------------------------
     displayOrgsHandler = () => {
-        this.setState({...this.state, displayOrgs: true});
+        this.setState({displayOrgs: true});
         let element = document.getElementsByClassName('display-orgs')[0];
         if (!element.classList.contains('active')) {
             element.classList.add('active');
@@ -47,13 +48,37 @@ export class NotEmployedComponent extends React.Component {
     }
 
     newOrgHandler = () => {
-        this.setState({...this.state, displayOrgs: false});
+        this.setState({displayOrgs: false});
         let element = document.getElementsByClassName('new-org')[0]
         if (!element.classList.contains('active')) {
             element.classList.add('active');
         }
         document.getElementsByClassName('display-orgs')[0].classList.remove('active')
     }
+
+    handleJoin(orgId) {
+        let body = {organisationId: orgId}
+        axios.post(env.BASE_URL + 'organisations/join', body, this.getHeaders()).then(
+            resp => {
+                this.props.onOrgChange(resp.data);
+            })
+    }
+
+    submit = () => {
+        let body = {name: this.state.orgName, hourlyRate: this.state.rate};
+        let headers = this.getHeaders();
+        axios.post(env.BASE_URL + 'organisations/create_join', body, headers).then(
+        resp => {
+            this.props.onOrgChange(resp.data);
+        })
+    }
+
+    handleUpdatedOrg = () => {
+        this.setState({...this.state, orgIndex: null});
+        this.loadOrgs();
+    }
+
+    // ------------------------------------ End of listeners --------------------------------------
 
     renderCreateOrg() {
         return (
@@ -62,8 +87,8 @@ export class NotEmployedComponent extends React.Component {
                     <Grid.Column className="w--100">
                         <Form size='large'>
                             <Segment>
-                                <Form.Input onChange={this.onNameChange} fluid icon='user' iconPosition='left' placeholder="Name e.g Bob's burger" />
-                                <Form.Input onChange={this.onSalaryChange} fluid icon='dollar sign' iconPosition='left' placeholder='Hourly Rate' />
+                                <Form.Input onChange={(e)=>this.setState({orgName: e.target.value})} fluid icon='user' iconPosition='left' placeholder="Name e.g Bob's burger" />
+                                <Form.Input onChange={(e)=>this.setState({rate: e.target.value})} fluid icon='dollar sign' iconPosition='left' placeholder='Hourly Rate' />
                                 <Button color='teal' onClick={this.submit} fluid size='large'>Create and Join</Button>
                             </Segment>
                         </Form>
@@ -73,22 +98,10 @@ export class NotEmployedComponent extends React.Component {
         )
     }
 
-    handleEdit(i) {
-        this.setState({...this.state, orgIndex: i});
-    }
-    
-    handleJoin(orgId) {
-        let body = {organisationId: orgId}
-        axios.post(env.BASE_URL + 'organisations/join', body, this.getHeaders()).then(
-            resp => {
-                this.props.onOrgChange(resp.data);
-            })
-    }
-
     renderEachOrg() {
         return this.state.orgs.map(
             (org, i) => {
-                return (<li key={i} className="item">{org.name} <span className="edit-join pl--1" onClick={() => this.handleEdit(i)}>Edit</span> <span className="edit-join pl--0_5" onClick={()=>this.handleJoin(org.id)}>Join</span></li>) 
+                return (<li key={i} className="item">{org.name} <span className="edit-join pl--1" onClick={() => this.setState({orgIndex: i})}>Edit</span> <span className="edit-join pl--0_5" onClick={()=>this.handleJoin(org.id)}>Join</span></li>) 
             }
         )
     }
@@ -107,28 +120,6 @@ export class NotEmployedComponent extends React.Component {
             return this.renderExistingOrgs();
         }
         return this.renderCreateOrg();
-    }
-
-    onNameChange = (event) => {
-        this.setState({...this.state, orgName: event.target.value})
-    }
-
-    onSalaryChange = (event) => {
-        this.setState({...this.state, rate: event.target.value})
-    }
-
-    submit = () => {
-        let body = {name: this.state.orgName, hourlyRate: this.state.rate};
-        let headers = this.getHeaders();
-        axios.post(env.BASE_URL + 'organisations/create_join', body, headers).then(
-        resp => {
-            this.props.onOrgChange(resp.data);
-        })
-    }
-
-    handleUpdatedOrg = () => {
-        this.setState({...this.state, orgIndex: null});
-        this.loadOrgs();
     }
 
     renderEditForm() {
